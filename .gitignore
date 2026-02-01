@@ -1,0 +1,4 @@
+# Node.js / JS
+node_modules/
+dist/
+.env
