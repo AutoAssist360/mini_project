@@ -2,12 +2,6 @@
 
 ## DEV Branch
 - only for development purpose.
-## Team Members
-- Shivanand Gupta (as Svont) (Developer)
-- member_name (Developer)
-- member_name (Developer)
-- member_name (Developer)
-- member_name (Developer)
 
 ## Branching & Workflow Rules
 1. **Never push directly** to `main` or `dev`.
