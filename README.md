@@ -5,7 +5,7 @@
 ## Team Members
 - Shivanand Gupta (as Svont) (Developer)
 - Soham Dhakate (Developer)
-- member_name (Developer)
+- Shobhit Choradia (Developer)
 - member_name (Developer)
 - member_name (Developer)
 
