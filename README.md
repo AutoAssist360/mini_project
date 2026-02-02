@@ -4,7 +4,7 @@
 - for production use only.
 ## Team Members
 - Shivanand Gupta (as Svont) (Developer)
-- member_name (Developer)
+- Shobhit Choradia (Developer)
 - member_name (Developer)
 - member_name (Developer)
 - member_name (Developer)
