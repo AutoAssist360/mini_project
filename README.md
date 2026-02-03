@@ -3,7 +3,7 @@
 ## MAIN Branch
 - for production use only.
 ## Team Members
-- Shivanand Gupta (as Svont) (Developer)
+- Svont (Developer)
 - Soham Dhakate (Developer)
 - Shobhit Choradia (Developer)
 - member_name (Developer)
