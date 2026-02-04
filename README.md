@@ -1,7 +1,13 @@
 # AutoAssist 
 
-## DEV Branch
-- only for development purpose.
+## MAIN Branch
+- for production use only.
+## Team Members
+- Svont (Developer)
+- Soham Dhakate (Developer)
+- Shobhit Choradia (Developer)
+- member_name (Developer)
+- member_name (Developer)
 
 ## Branching & Workflow Rules
 1. **Never push directly** to `main` or `dev`.
