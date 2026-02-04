@@ -13,7 +13,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 // --- 1. USER MANAGEMENT ---
 
 enum Role {
@@ -407,7 +406,6 @@ model InvoiceItem {
 
   @@map("invoice_items")
 }
-
 
 // --- 9. RATINGS ---
 
