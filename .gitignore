@@ -1,4 +1,5 @@
 # Node.js / JS
 node_modules/
 dist/
-.env
+database\.env
+/generated/prisma
