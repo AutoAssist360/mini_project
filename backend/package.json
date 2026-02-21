@@ -1,0 +1,14 @@
+{
+  "name": "Auto_Assist_360_Backend",
+  "version": "1.0.0",
+  "description": "This folder contains all backend-related code, such as APIs, server logic, and database scripts.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
