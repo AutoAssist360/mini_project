@@ -1,4 +1,22 @@
-# Node.js / JS
+# dependencies
 node_modules/
-dist/
+
+# env
 .env
+.env.local
+.env.*.local
+
+# prisma
+prisma/dev.db
+prisma/dev.db-journal
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+/dist
