@@ -45,7 +45,7 @@ techAuthRouter.post(
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-    const user = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
           email,
@@ -71,15 +71,8 @@ techAuthRouter.post(
       return newUser;
     });
 
-    const payload = { userId: user.user_id, role: user.role };
-    const accessToken = generateAccessToken(payload);
-    const refreshToken = generateRefreshToken(payload);
-
-    setAuthCookies(res, accessToken, refreshToken);
-
     res.status(201).json({
-      message: "Technician account created successfully",
-      accessToken,
+      message: "Technician account created successfully. Please sign in.",
     });
   })
 );

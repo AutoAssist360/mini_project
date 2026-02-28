@@ -10,11 +10,11 @@ import { paginate, paginationQuery } from "../../../utils/paginate.js";
 
 export const messageRouter = Router();
 
-messageRouter.use(userAuth, roleGuard("user", "admin"));
-
 // ─── GET /requests/:requestId/messages ───────────────────────
 messageRouter.get(
   "/requests/:requestId/messages",
+  userAuth,
+  roleGuard("user", "admin"),
   asyncWrapper(async (req, res) => {
     const requestId = req.params.requestId ;
 
@@ -69,6 +69,8 @@ messageRouter.get(
 // ─── POST /requests/:requestId/messages ──────────────────────
 messageRouter.post(
   "/requests/:requestId/messages",
+  userAuth,
+  roleGuard("user", "admin"),
   validate(sendMessageSchema),
   asyncWrapper(async (req, res) => {
     const requestId = req.params.requestId ;

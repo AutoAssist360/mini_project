@@ -1,34 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import TechnicianSignInPage from './pages/TechnicianSignInPage'
+import TechnicianSignUpPage from './pages/TechnicianSignUpPage'
+import TechnicianDashboardPage from './pages/TechnicianDashboardPage'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [theme, setTheme] = useState(() => {
+    const storedTheme = localStorage.getItem('qa-technician-theme')
+    if (storedTheme) {
+      return storedTheme
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+    localStorage.setItem('qa-technician-theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(nextTheme)
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Routes>
+      <Route path="/" element={<Navigate to="/auth/technician/signin" replace />} />
+      <Route path="/auth/technician/signin" element={<TechnicianSignInPage theme={theme} onToggleTheme={toggleTheme} />} />
+      <Route path="/auth/technician/signup" element={<TechnicianSignUpPage theme={theme} onToggleTheme={toggleTheme} />} />
+      <Route path="/dashboard" element={<TechnicianDashboardPage theme={theme} onToggleTheme={toggleTheme} />} />
+      <Route path="*" element={<Navigate to="/auth/technician/signin" replace />} />
+    </Routes>
   )
 }
 

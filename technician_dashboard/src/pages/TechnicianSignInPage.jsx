@@ -2,10 +2,10 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { ApiError, getMyProfile, userSignIn } from '../lib/api'
+import { ApiError, getTechnicianProfile, technicianSignIn } from '../lib/api'
 import { setAuthTokens, setAuthUser } from '../store/authSlice'
 
-function UserSignInPage({ theme, onToggleTheme }) {
+function TechnicianSignInPage({ theme, onToggleTheme }) {
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch()
@@ -55,7 +55,7 @@ function UserSignInPage({ theme, onToggleTheme }) {
     setErrors({ email: '', password: '', form: '' })
 
     try {
-      const signInResponse = await userSignIn({
+      const signInResponse = await technicianSignIn({
         email: form.email,
         password: form.password,
       })
@@ -67,14 +67,14 @@ function UserSignInPage({ theme, onToggleTheme }) {
         }),
       )
 
-      const profileResponse = await getMyProfile(signInResponse?.accessToken)
-      const role = profileResponse?.user?.role || 'user'
+      const profileResponse = await getTechnicianProfile(signInResponse?.accessToken)
+      const role = profileResponse?.profile?.user?.role || ''
 
-      if (role !== 'user') {
-        throw new ApiError('This login page is only for customer accounts.', 403)
+      if (role !== 'technician') {
+        throw new ApiError('This login page is only for technician accounts.', 403)
       }
 
-      dispatch(setAuthUser(profileResponse?.user || null))
+      dispatch(setAuthUser(profileResponse?.profile || null))
       navigate('/dashboard')
     } catch (error) {
       if (error instanceof ApiError) {
@@ -93,11 +93,7 @@ function UserSignInPage({ theme, onToggleTheme }) {
         <header className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <a href={import.meta.env.VITE_LANDING_APP_URL || 'http://localhost:5173'} className="text-lg font-semibold">Quick Auto Assist</a>
-            <button
-              type="button"
-              onClick={onToggleTheme}
-              className="rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-            >
+            <button type="button" onClick={onToggleTheme} className="rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">
               {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
             </button>
           </div>
@@ -105,10 +101,10 @@ function UserSignInPage({ theme, onToggleTheme }) {
 
         <main className="mt-5 grid gap-4 lg:grid-cols-2">
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-300">Customer Login</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-300">Technician Login</p>
             <h1 className="mt-2 text-2xl font-bold tracking-tight">Sign in to continue</h1>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-              Access your dashboard, raise new service requests, track technician offers, and manage invoices.
+              Access job assignments, submit offers, and manage your technician operations.
             </p>
 
             {signupSuccessMessage && (
@@ -161,19 +157,18 @@ function UserSignInPage({ theme, onToggleTheme }) {
               </button>
             </form>
 
-            <div className="mt-4 flex flex-wrap gap-4 text-sm">
-              <a href="/auth/forgot-password" className="text-emerald-600 hover:text-emerald-500 dark:text-emerald-300">Forgot password?</a>
-              <Link to="/auth/user/signup" className="text-emerald-600 hover:text-emerald-500 dark:text-emerald-300">Create account</Link>
+            <div className="mt-4 text-sm">
+              <Link to="/auth/technician/signup" className="text-emerald-600 hover:text-emerald-500 dark:text-emerald-300">Create technician account</Link>
             </div>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <h2 className="text-lg font-semibold">Production Flow Notes</h2>
             <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              <li>Frontend calls <span className="font-semibold">POST /auth/signin</span> with credentials.</li>
-              <li>Backend sets secure cookies and returns token payload.</li>
-              <li>Frontend verifies session via <span className="font-semibold">GET /profile/me</span>.</li>
-              <li>If role is `user`, navigate to dashboard.</li>
+              <li>Frontend calls <span className="font-semibold">POST /tech/auth/signin</span>.</li>
+              <li>Backend validates technician role and sets auth cookies.</li>
+              <li>Frontend verifies via <span className="font-semibold">GET /tech/profile</span>.</li>
+              <li>If role is technician, app redirects to dashboard.</li>
             </ol>
           </section>
         </main>
@@ -182,4 +177,4 @@ function UserSignInPage({ theme, onToggleTheme }) {
   )
 }
 
-export default UserSignInPage
+export default TechnicianSignInPage

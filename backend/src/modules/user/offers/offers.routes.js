@@ -8,11 +8,11 @@ import { AppError } from "../../../utils/AppError.js";
 
 export const offerRouter = Router();
 
-offerRouter.use(userAuth, roleGuard("user", "admin"));
-
 // ─── GET /requests/:requestId/offers ─────────────────────────
 offerRouter.get(
   "/requests/:requestId/offers",
+  userAuth,
+  roleGuard("user", "admin"),
   asyncWrapper(async (req, res) => {
     const requestId = req.params.requestId ;
 
@@ -62,6 +62,8 @@ offerRouter.get(
 // ─── PATCH /offers/:offerId/accept ───────────────────────────
 offerRouter.patch(
   "/offers/:offerId/accept",
+  userAuth,
+  roleGuard("user", "admin"),
   asyncWrapper(async (req, res) => {
     const offerId = req.params.offerId ;
 
@@ -143,6 +145,8 @@ offerRouter.patch(
 // ─── PATCH /offers/:offerId/reject ───────────────────────────
 offerRouter.patch(
   "/offers/:offerId/reject",
+  userAuth,
+  roleGuard("user", "admin"),
   asyncWrapper(async (req, res) => {
     const offerId = req.params.offerId ;
 

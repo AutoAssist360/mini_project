@@ -49,9 +49,8 @@ authRouter.post(
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     // If user was soft-deleted, reactivate with new data; otherwise create new
-    let user;
     if (existingUser && existingUser.deleted_at) {
-      user = await prisma.user.update({
+      await prisma.user.update({
         where: { user_id: existingUser.user_id },
         data: {
           password: hashedPassword,
@@ -63,7 +62,7 @@ authRouter.post(
         },
       });
     } else {
-      user = await prisma.user.create({
+      await prisma.user.create({
         data: {
           email,
           password: hashedPassword,
@@ -74,15 +73,8 @@ authRouter.post(
       });
     }
 
-    const payload = { userId: user.user_id, role: user.role };
-    const accessToken = generateAccessToken(payload);
-    const refreshToken = generateRefreshToken(payload);
-
-    setAuthCookies(res, accessToken, refreshToken);
-
     res.status(201).json({
-      message: "User created successfully",
-      accessToken,
+      message: "User created successfully. Please sign in.",
     });
   })
 );

@@ -73,29 +73,29 @@ export async function apiRequest(path, options = {}) {
   throw lastError || new ApiError('Request failed', 500, null)
 }
 
-export async function userSignIn(payload) {
-  return apiRequest('/auth/signin', {
+export async function technicianSignIn(payload) {
+  return apiRequest('/tech/auth/signin', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
 }
 
-export async function userSignUp(payload) {
-  return apiRequest('/auth/signup', {
+export async function technicianSignUp(payload) {
+  return apiRequest('/tech/auth/signup', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
 }
 
-export async function getMyProfile(accessToken) {
-  return apiRequest('/profile', {
+export async function getTechnicianProfile(accessToken) {
+  return apiRequest('/tech/profile', {
     method: 'GET',
     accessToken,
   })
 }
 
-export async function userLogout() {
-  return apiRequest('/auth/logout', {
+export async function technicianLogout() {
+  return apiRequest('/tech/auth/logout', {
     method: 'POST',
   })
 }

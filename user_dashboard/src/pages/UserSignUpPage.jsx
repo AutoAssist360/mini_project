@@ -1,12 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { ApiError, getMyProfile, userSignUp } from '../lib/api'
-import { setAuthTokens, setAuthUser } from '../store/authSlice'
+import { ApiError, userSignUp } from '../lib/api'
 
 function UserSignUpPage({ theme, onToggleTheme }) {
   const navigate = useNavigate()
-  const dispatch = useDispatch()
 
   const [form, setForm] = useState({
     full_name: '',
@@ -65,23 +62,16 @@ function UserSignUpPage({ theme, onToggleTheme }) {
     setErrors((prev) => ({ ...prev, form: '' }))
 
     try {
-      const signUpResponse = await userSignUp({
+      await userSignUp({
         full_name: form.full_name.trim(),
         email: form.email,
         phone_number: form.phone_number,
         password: form.password,
       })
-
-      dispatch(
-        setAuthTokens({
-          accessToken: signUpResponse?.accessToken || null,
-          refreshToken: signUpResponse?.refreshToken || null,
-        }),
-      )
-
-      const profileResponse = await getMyProfile()
-      dispatch(setAuthUser(profileResponse?.user || null))
-      navigate('/dashboard')
+      navigate('/auth/user/signin', {
+        replace: true,
+        state: { signupSuccess: 'Account created successfully. Please sign in.' },
+      })
     } catch (error) {
       if (error instanceof ApiError) setErrors((prev) => ({ ...prev, form: error.message }))
       else setErrors((prev) => ({ ...prev, form: 'Unable to create account. Please try again.' }))
@@ -150,9 +140,9 @@ function UserSignUpPage({ theme, onToggleTheme }) {
             <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-slate-600 dark:text-slate-300">
               <li>POST /auth/signup is called with registration payload.</li>
               <li>Backend validates and writes user record to Prisma DB.</li>
-              <li>Backend generates access/refresh token session.</li>
-              <li>Frontend stores auth state in Redux.</li>
-              <li>Frontend fetches profile and redirects to dashboard.</li>
+              <li>Backend returns account-created response.</li>
+              <li>Frontend redirects to sign-in page.</li>
+              <li>User signs in manually and enters dashboard.</li>
             </ol>
           </section>
         </main>
