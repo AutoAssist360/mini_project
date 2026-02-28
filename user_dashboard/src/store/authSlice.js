@@ -1,33 +1,37 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const initialState = {
-  accessToken: null,
-  refreshToken: null,
-  user: null,
-  isAuthenticated: false,
-}
-
+/**
+ * Auth state — tokens are NEVER stored in JS.
+ * The backend sets httpOnly cookies for accessToken & refreshToken.
+ * We only keep non-sensitive user profile data + session flags in Redux.
+ *
+ * On page refresh:
+ *   App.jsx calls GET /profile (cookie auto-sent) → restores user.
+ *   If access token expired the api layer auto-calls POST /auth/refresh.
+ */
 const authSlice = createSlice({
   name: 'auth',
-  initialState,
+  initialState: {
+    user: null,
+    isAuthenticated: false,
+    isInitializing: true, // true until first session check completes
+  },
   reducers: {
-    setAuthTokens(state, action) {
-      state.accessToken = action.payload.accessToken || null
-      state.refreshToken = action.payload.refreshToken || null
-      state.isAuthenticated = Boolean(action.payload.accessToken || action.payload.refreshToken)
-    },
     setAuthUser(state, action) {
       state.user = action.payload || null
-      state.isAuthenticated = Boolean(state.accessToken || state.refreshToken || state.user)
+      state.isAuthenticated = Boolean(action.payload)
+      state.isInitializing = false
     },
     clearAuth(state) {
-      state.accessToken = null
-      state.refreshToken = null
       state.user = null
       state.isAuthenticated = false
+      state.isInitializing = false
+    },
+    setInitializing(state, action) {
+      state.isInitializing = Boolean(action.payload)
     },
   },
 })
 
-export const { setAuthTokens, setAuthUser, clearAuth } = authSlice.actions
+export const { setAuthUser, clearAuth, setInitializing } = authSlice.actions
 export default authSlice.reducer

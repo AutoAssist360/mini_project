@@ -94,7 +94,7 @@ function UserSignUpPage({ theme, onToggleTheme }) {
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-300">Customer Registration</p>
             <h1 className="mt-2 text-2xl font-bold tracking-tight">Create your account</h1>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Signup sends data to backend and persists in Prisma database.</p>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Join thousands of vehicle owners getting fast, reliable roadside and workshop assistance.</p>
 
             <form className="mt-5 grid gap-4" onSubmit={handleSubmit} noValidate>
               <div>
@@ -136,14 +136,25 @@ function UserSignUpPage({ theme, onToggleTheme }) {
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-semibold">Backend + Prisma flow</h2>
-            <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              <li>POST /auth/signup is called with registration payload.</li>
-              <li>Backend validates and writes user record to Prisma DB.</li>
-              <li>Backend returns account-created response.</li>
-              <li>Frontend redirects to sign-in page.</li>
-              <li>User signs in manually and enters dashboard.</li>
-            </ol>
+            <h2 className="text-lg font-semibold">Get Started in Minutes</h2>
+            <ul className="mt-4 space-y-4 text-sm text-slate-600 dark:text-slate-300">
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">1</span>
+                <span><span className="font-semibold text-slate-900 dark:text-slate-100">Create your account</span> — Fill in the form and you're registered instantly.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">2</span>
+                <span><span className="font-semibold text-slate-900 dark:text-slate-100">Add your vehicles</span> — Register your cars with make, model, and registration details.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">3</span>
+                <span><span className="font-semibold text-slate-900 dark:text-slate-100">Raise an issue</span> — Describe the problem and our network of technicians will respond with offers.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">4</span>
+                <span><span className="font-semibold text-slate-900 dark:text-slate-100">Track & pay</span> — Monitor your job in real-time and pay securely once the work is done.</span>
+              </li>
+            </ul>
           </section>
         </main>
       </div>

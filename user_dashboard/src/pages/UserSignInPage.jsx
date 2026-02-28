@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { ApiError, getMyProfile, userSignIn } from '../lib/api'
-import { setAuthTokens, setAuthUser } from '../store/authSlice'
+import { setAuthUser } from '../store/authSlice'
 
 function UserSignInPage({ theme, onToggleTheme }) {
   const navigate = useNavigate()
@@ -55,19 +55,14 @@ function UserSignInPage({ theme, onToggleTheme }) {
     setErrors({ email: '', password: '', form: '' })
 
     try {
-      const signInResponse = await userSignIn({
+      // POST /auth/signin — backend sets httpOnly cookies automatically
+      await userSignIn({
         email: form.email,
         password: form.password,
       })
 
-      dispatch(
-        setAuthTokens({
-          accessToken: signInResponse?.accessToken || null,
-          refreshToken: signInResponse?.refreshToken || null,
-        }),
-      )
-
-      const profileResponse = await getMyProfile(signInResponse?.accessToken)
+      // Cookies are now set — fetch profile using them
+      const profileResponse = await getMyProfile()
       const role = profileResponse?.user?.role || 'user'
 
       if (role !== 'user') {
@@ -161,20 +156,31 @@ function UserSignInPage({ theme, onToggleTheme }) {
               </button>
             </form>
 
-            <div className="mt-4 flex flex-wrap gap-4 text-sm">
-              <a href="/auth/forgot-password" className="text-emerald-600 hover:text-emerald-500 dark:text-emerald-300">Forgot password?</a>
-              <Link to="/auth/user/signup" className="text-emerald-600 hover:text-emerald-500 dark:text-emerald-300">Create account</Link>
+            <div className="mt-4 text-sm">
+              <Link to="/auth/user/signup" className="text-emerald-600 hover:text-emerald-500 dark:text-emerald-300">Don't have an account? Create one</Link>
             </div>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-semibold">Production Flow Notes</h2>
-            <ol className="mt-3 list-inside list-decimal space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              <li>Frontend calls <span className="font-semibold">POST /auth/signin</span> with credentials.</li>
-              <li>Backend sets secure cookies and returns token payload.</li>
-              <li>Frontend verifies session via <span className="font-semibold">GET /profile/me</span>.</li>
-              <li>If role is `user`, navigate to dashboard.</li>
-            </ol>
+            <h2 className="text-lg font-semibold">Why Quick Auto Assist?</h2>
+            <ul className="mt-4 space-y-4 text-sm text-slate-600 dark:text-slate-300">
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">1</span>
+                <span><span className="font-semibold text-slate-900 dark:text-slate-100">Instant Help</span> — Raise a service request in seconds and get offers from verified technicians nearby.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">2</span>
+                <span><span className="font-semibold text-slate-900 dark:text-slate-100">Transparent Pricing</span> — Compare technician offers with estimated costs before you commit.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">3</span>
+                <span><span className="font-semibold text-slate-900 dark:text-slate-100">Real-time Tracking</span> — Follow your job status, chat with technicians, and get invoiced upon completion.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">4</span>
+                <span><span className="font-semibold text-slate-900 dark:text-slate-100">Secure Payments</span> — Pay via UPI, card, or net banking with transaction tracking built-in.</span>
+              </li>
+            </ul>
           </section>
         </main>
       </div>

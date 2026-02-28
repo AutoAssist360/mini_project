@@ -11,6 +11,47 @@ export const vehicleRouter = Router();
 
 vehicleRouter.use(userAuth, roleGuard("user", "admin"));
 
+// ─── GET /vehicles/variants ──────────────────────────────────
+vehicleRouter.get(
+  "/variants",
+  asyncWrapper(async (req, res) => {
+    const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+    const limitRaw = Number.parseInt(String(req.query.limit ?? "50"), 10);
+    const limit = Number.isNaN(limitRaw) ? 50 : Math.min(Math.max(limitRaw, 1), 200);
+
+    const where = q
+      ? {
+          OR: [
+            { variant_name: { contains: q, mode: "insensitive" } },
+            { model: { model_name: { contains: q, mode: "insensitive" } } },
+            {
+              model: {
+                company: {
+                  company_name: { contains: q, mode: "insensitive" },
+                },
+              },
+            },
+          ],
+        }
+      : undefined;
+
+    const variants = await prisma.carVariant.findMany({
+      where,
+      include: {
+        model: {
+          include: {
+            company: true,
+          },
+        },
+      },
+      orderBy: [{ model: { company: { company_name: "asc" } } }, { model: { model_name: "asc" } }, { variant_name: "asc" }],
+      take: limit,
+    });
+
+    res.json({ variants, total: variants.length, limit, query: q || null });
+  })
+);
+
 // ─── POST /vehicles ──────────────────────────────────────────
 vehicleRouter.post(
   "/",
