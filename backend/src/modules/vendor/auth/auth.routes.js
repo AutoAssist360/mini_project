@@ -34,7 +34,7 @@ vendorAuthRouter.post(
 
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
 
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         email,
         password: hashed,
@@ -44,15 +44,8 @@ vendorAuthRouter.post(
       },
     });
 
-    const payload = { userId: user.user_id, role: user.role };
-    const accessToken = generateAccessToken(payload);
-    const refreshToken = generateRefreshToken(payload);
-
-    setAuthCookies(res, accessToken, refreshToken);
-
     res.status(201).json({
-      message: "Vendor account created successfully",
-      accessToken,
+      message: "Vendor account created successfully. Please sign in.",
     });
   })
 );
