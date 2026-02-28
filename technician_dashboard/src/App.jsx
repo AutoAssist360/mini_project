@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import TechnicianSignInPage from './pages/TechnicianSignInPage'
 import TechnicianSignUpPage from './pages/TechnicianSignUpPage'
 import TechnicianDashboardPage from './pages/TechnicianDashboardPage'
+
+function RequireAuth({ children }) {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/technician/signin" replace />
+  }
+  return children
+}
 
 function App() {
   const [theme, setTheme] = useState(() => {
@@ -28,7 +37,14 @@ function App() {
       <Route path="/" element={<Navigate to="/auth/technician/signin" replace />} />
       <Route path="/auth/technician/signin" element={<TechnicianSignInPage theme={theme} onToggleTheme={toggleTheme} />} />
       <Route path="/auth/technician/signup" element={<TechnicianSignUpPage theme={theme} onToggleTheme={toggleTheme} />} />
-      <Route path="/dashboard" element={<TechnicianDashboardPage theme={theme} onToggleTheme={toggleTheme} />} />
+      <Route
+        path="/dashboard"
+        element={(
+          <RequireAuth>
+            <TechnicianDashboardPage theme={theme} onToggleTheme={toggleTheme} />
+          </RequireAuth>
+        )}
+      />
       <Route path="*" element={<Navigate to="/auth/technician/signin" replace />} />
     </Routes>
   )

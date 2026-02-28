@@ -80,9 +80,9 @@ If you build UI for these planned items now, keep them behind feature flags unti
 
 ### CTA navigation
 - `Get Help Now` → `/auth/role?intent=help`
-- `Join as Technician` → `/auth/technician/signup`
+- `Join as Technician` → `/auth/role?intent=signup&role=technician`
 - `Login` → `/auth/role?intent=login`
-- `Admin Access` (hidden style) → `/admin/login`
+- `Admin Access` (hidden style) → `/auth/role?intent=login&role=admin`
 
 ---
 
@@ -98,23 +98,24 @@ If you build UI for these planned items now, keep them behind feature flags unti
 
 ### Role routing
 - Customer:
-  - Login → `/auth/user/signin`
-  - Register → `/auth/user/signup`
+  - Login → `${VITE_USER_APP_URL}/auth/user/signin`
+  - Register → `${VITE_USER_APP_URL}/auth/user/signup`
 - Technician:
-  - Login → `/auth/technician/signin`
-  - Register → `/auth/technician/signup`
+  - Login → `${VITE_TECHNICIAN_APP_URL}/auth/technician/signin`
+  - Register → `${VITE_TECHNICIAN_APP_URL}/auth/technician/signup`
 - Vendor:
-  - Login → `/auth/vendor/signin`
-  - Register → `/auth/vendor/signup`
+  - Login → `${VITE_VENDOR_APP_URL}/auth/vendor/signin`
+  - Register → `${VITE_VENDOR_APP_URL}/auth/vendor/signup`
 - Admin:
-  - Login only → `/admin/login` (admins are seeded/created by ops)
+  - Login only → `${VITE_ADMIN_APP_URL}/admin/login` (admins are seeded/created by ops)
 
 ---
 
 ## 5) Authentication and session flow
 
 ## 5.1 Shared auth behavior
-- On successful sign-in/sign-up, backend sets httpOnly cookies and returns access token
+- On successful sign-in, backend sets httpOnly cookies and returns access token
+- On successful sign-up (user/technician/vendor), backend returns success message only; frontend navigates to corresponding sign-in page
 - Frontend should use `credentials: 'include'`
 - Token refresh flow: call refresh endpoint on `401 TOKEN_EXPIRED`, retry original request once
 - On logout, clear local user store and navigate to `/`
@@ -144,7 +145,7 @@ If you build UI for these planned items now, keep them behind feature flags unti
 
 ### API mapping
 - Submit → `POST /auth/signup`
-- Success → `/user/dashboard`
+- Success → `/auth/user/signin` (with success message)
 
 ---
 
@@ -183,7 +184,7 @@ If you build UI for these planned items now, keep them behind feature flags unti
 - `Logout`
 
 ### API mapping
-- Load profile → `GET /profile/me`
+- Load profile → `GET /profile`
 - Load recent request list → `GET /requests?page=&limit=`
 - Load pending invoices → `GET /invoices?payment_status=pending`
 
@@ -319,8 +320,8 @@ If you build UI for these planned items now, keep them behind feature flags unti
 - `POST /tech/auth/signup`
 
 ### Post-signup states
-- If admin verification required, show `Pending Approval`
-- After verification, full dashboard access
+- Account is created and frontend redirects to `/auth/technician/signin` with success message
+- If verification is required, backend can return pending/blocked state during sign-in until admin verification is complete
 
 ---
 
@@ -410,6 +411,7 @@ If you build UI for these planned items now, keep them behind feature flags unti
 
 ## 8.1 Vendor auth
 - Signup/Login via `/vendor/auth/*`
+- Signup success redirects to `/auth/vendor/signin` with a success message
 
 ## 8.2 Vendor dashboard: `/vendor/dashboard`
 - Warehouse count
@@ -437,7 +439,7 @@ If you build UI for these planned items now, keep them behind feature flags unti
 ## 9.1 Admin login
 - Route: `/admin/login`
 - API: `POST /admin/auth/signin`
-- Admin should not be in public register flow
+- Admin should not be in public register flow (manual admin creation only)
 
 ## 9.2 Admin dashboard route map
 - `/admin/dashboard`
@@ -526,6 +528,8 @@ This is required by your ask but needs backend extension for clean implementatio
 ---
 
 ## 13) Frontend route matrix (recommended)
+
+Note: In current implementation, these routes are served by separate role-specific apps and selected from `landing_page` via app base URLs from environment variables.
 
 ## Public
 - `/`
@@ -643,7 +647,7 @@ This is required by your ask but needs backend extension for clean implementatio
 
 ## Auth
 - User signup/login/logout/refresh cycle
-- Technician signup pending verification state
+- Technician signup redirects to sign-in; pending verification state (if enabled) is handled at sign-in response
 - Admin hidden entry login
 
 ## User service lifecycle
