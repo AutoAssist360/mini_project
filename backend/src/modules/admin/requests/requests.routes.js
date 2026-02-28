@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { validate } from "../../../middleware/validate";
-import { listRequestsQuery, forceAssignSchema } from "../admin.schemas";
-import { logAudit, dateFilter, paginate } from "../admin.helpers";
+import { prisma } from "../../../lib/prisma.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { validate } from "../../../middleware/validate.js";
+import { listRequestsQuery, forceAssignSchema } from "../admin.schemas.js";
+import { logAudit, dateFilter, paginate } from "../admin.helpers.js";
 
 export const adminRequestsRouter = Router();
 

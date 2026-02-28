@@ -1,5 +1,5 @@
 
-import { IS_PRODUCTION } from "../../config";
+import { IS_PRODUCTION } from "../../config.js";
 
 const accessCookieOptions = {
   httpOnly: true,

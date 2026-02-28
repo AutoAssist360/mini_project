@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { validate } from "../../../middleware/validate";
-import { createOfferSchema } from "../technician.schemas";
-import { paginate, paginationQuery } from "../../../utils/paginate";
+import { prisma } from "../../../lib/prisma.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { validate } from "../../../middleware/validate.js";
+import { createOfferSchema } from "../technician.schemas.js";
+import { paginate, paginationQuery } from "../../../utils/paginate.js";
 
 export const techOffersRouter = Router();
 

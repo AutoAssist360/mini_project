@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { clearAuthCookies } from "../../../utils/cookieHelper";
-import { validate } from "../../../middleware/validate";
-import { updateProfileSchema } from "./profile.schemas";
+import { prisma } from "../../../lib/prisma.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { clearAuthCookies } from "../../../utils/cookieHelper.js";
+import { validate } from "../../../middleware/validate.js";
+import { updateProfileSchema } from "./profile.schemas.js";
 
 export const profileRouter = Router();
 

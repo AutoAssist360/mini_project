@@ -1,12 +1,12 @@
  function _nullishCoalesce(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { validate } from "../../../middleware/validate";
-import { createReviewSchema } from "./reviews.schemas";
-import { paginate, paginationQuery } from "../../../utils/paginate";
+import { prisma } from "../../../lib/prisma.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { validate } from "../../../middleware/validate.js";
+import { createReviewSchema } from "./reviews.schemas.js";
+import { paginate, paginationQuery } from "../../../utils/paginate.js";
 
 export const reviewRouter = Router();
 

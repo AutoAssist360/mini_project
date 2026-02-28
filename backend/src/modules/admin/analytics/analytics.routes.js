@@ -1,11 +1,11 @@
  function _nullishCoalesce(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { analyticsQuery } from "../admin.schemas";
-import { dateFilter } from "../admin.helpers";
-import { Decimal } from "../../../../generated/prisma/internal/prismaNamespace";
+import Decimal from "decimal.js";
+import { prisma } from "../../../lib/prisma.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { analyticsQuery } from "../admin.schemas.js";
+import { dateFilter } from "../admin.helpers.js";
 
 export const adminAnalyticsRouter = Router();
 

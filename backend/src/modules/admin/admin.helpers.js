@@ -1,4 +1,4 @@
- function _nullishCoalesce(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }import { prisma } from "../../lib/prisma";
+ function _nullishCoalesce(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }import { prisma } from "../../lib/prisma.js";
 
 /**
  * Write an entry to the audit_logs table.

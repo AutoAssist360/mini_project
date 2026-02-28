@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { USER_SECRET, REFRESH_SECRET, RESET_SECRET } from "../../config";
+import { USER_SECRET, REFRESH_SECRET, RESET_SECRET } from "../../config.js";
 
 
 

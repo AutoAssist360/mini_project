@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { listTechniciansQuery, listJobsQuery } from "../admin.schemas";
-import { logAudit, paginate, dateFilter } from "../admin.helpers";
+import { prisma } from "../../../lib/prisma.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { listTechniciansQuery, listJobsQuery } from "../admin.schemas.js";
+import { logAudit, paginate, dateFilter } from "../admin.helpers.js";
 
 export const adminTechniciansRouter = Router();
 

@@ -1,17 +1,17 @@
  function _nullishCoalesce(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { validate } from "../../../middleware/validate";
+import { prisma } from "../../../lib/prisma.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { validate } from "../../../middleware/validate.js";
 import {
   addInventorySchema,
   updateInventorySchema,
   bulkInventorySchema,
   listInventoryQuery,
-} from "../vendor.schemas";
-import { ownerWarehouse, paginate } from "../vendor.helpers";
+} from "../vendor.schemas.js";
+import { ownerWarehouse, paginate } from "../vendor.helpers.js";
 
 export const vendorInventoryRouter = Router();
 vendorInventoryRouter.use(userAuth, roleGuard("vendor"));

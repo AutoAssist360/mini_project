@@ -1,18 +1,18 @@
 import { Router } from "express";
 import crypto from "crypto";
-import { Decimal } from "../../../../generated/prisma/internal/prismaNamespace";
-import { prisma } from "../../../lib/prisma";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { validate } from "../../../middleware/validate";
+import Decimal from "decimal.js";
+import { prisma } from "../../../lib/prisma.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { validate } from "../../../middleware/validate.js";
 import {
   createOrderSchema,
   payOrderSchema,
   reservePartSchema,
-} from "./orders.schemas";
-import { paginate, paginationQuery } from "../../../utils/paginate";
+} from "./orders.schemas.js";
+import { paginate, paginationQuery } from "../../../utils/paginate.js";
 
 export const orderRouter = Router();
 

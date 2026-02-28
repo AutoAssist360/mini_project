@@ -1,25 +1,25 @@
  function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }import { Router } from "express";
 import bcrypt from "bcrypt";
-import { prisma } from "../../../lib/prisma";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { setAuthCookies, clearAuthCookies } from "../../../utils/cookieHelper";
+import { prisma } from "../../../lib/prisma.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { setAuthCookies, clearAuthCookies } from "../../../utils/cookieHelper.js";
 import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
   generateResetToken,
   verifyResetToken,
-} from "../../../utils/tokenHelper";
-import { validate } from "../../../middleware/validate";
+} from "../../../utils/tokenHelper.js";
+import { validate } from "../../../middleware/validate.js";
 import {
   signupSchema,
   signinSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
   changePasswordSchema,
-} from "./auth.schemas";
-import { userAuth } from "../../../middleware/auth";
+} from "./auth.schemas.js";
+import { userAuth } from "../../../middleware/auth.js";
 
 export const authRouter = Router();
 

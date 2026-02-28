@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { validate } from "../../../middleware/validate";
-import { updateProfileSchema, addCertificationSchema } from "../technician.schemas";
+import { prisma } from "../../../lib/prisma.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { validate } from "../../../middleware/validate.js";
+import { updateProfileSchema, addCertificationSchema } from "../technician.schemas.js";
 
 export const techProfileRouter = Router();
 

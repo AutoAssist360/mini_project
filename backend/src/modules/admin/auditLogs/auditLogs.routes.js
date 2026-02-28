@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { listAuditLogsQuery } from "../admin.schemas";
-import { dateFilter, paginate } from "../admin.helpers";
+import { prisma } from "../../../lib/prisma.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { listAuditLogsQuery } from "../admin.schemas.js";
+import { dateFilter, paginate } from "../admin.helpers.js";
 
 export const adminAuditLogsRouter = Router();
 

@@ -4,60 +4,70 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 // ─── User module routers ─────────────────────────────────────
-import { authRouter } from "./modules/user/auth/auth.routes";
-import { profileRouter } from "./modules/user/profile/profile.routes";
-import { vehicleRouter } from "./modules/user/vehicles/vehicles.routes";
-import { requestRouter } from "./modules/user/requests/requests.routes";
-import { offerRouter } from "./modules/user/offers/offers.routes";
-import { jobRouter } from "./modules/user/jobs/jobs.routes";
-import { invoiceRouter } from "./modules/user/invoices/invoices.routes";
-import { orderRouter } from "./modules/user/orders/orders.routes";
-import { reviewRouter } from "./modules/user/reviews/reviews.routes";
-import { messageRouter } from "./modules/user/messages/messages.routes";
+import { authRouter } from "./modules/user/auth/auth.routes.js";
+import { profileRouter } from "./modules/user/profile/profile.routes.js";
+import { vehicleRouter } from "./modules/user/vehicles/vehicles.routes.js";
+import { requestRouter } from "./modules/user/requests/requests.routes.js";
+import { offerRouter } from "./modules/user/offers/offers.routes.js";
+import { jobRouter } from "./modules/user/jobs/jobs.routes.js";
+import { invoiceRouter } from "./modules/user/invoices/invoices.routes.js";
+import { orderRouter } from "./modules/user/orders/orders.routes.js";
+import { reviewRouter } from "./modules/user/reviews/reviews.routes.js";
+import { messageRouter } from "./modules/user/messages/messages.routes.js";
 
 // ─── Technician module routers ───────────────────────────────
-import { techAuthRouter } from "./modules/technician/auth/auth.routes";
-import { techProfileRouter } from "./modules/technician/profile/profile.routes";
-import { techAvailabilityRouter } from "./modules/technician/availability/availability.routes";
-import { techAssignmentsRouter } from "./modules/technician/assignments/assignments.routes";
-import { techOffersRouter } from "./modules/technician/offers/offers.routes";
-import { techJobsRouter } from "./modules/technician/jobs/jobs.routes";
-import { techEarningsRouter } from "./modules/technician/earnings/earnings.routes";
-import { techMessagesRouter } from "./modules/technician/messages/messages.routes";
-import { techLocationRouter } from "./modules/technician/location/location.routes";
+import { techAuthRouter } from "./modules/technician/auth/auth.routes.js";
+import { techProfileRouter } from "./modules/technician/profile/profile.routes.js";
+import { techAvailabilityRouter } from "./modules/technician/availability/availability.routes.js";
+import { techAssignmentsRouter } from "./modules/technician/assignments/assignments.routes.js";
+import { techOffersRouter } from "./modules/technician/offers/offers.routes.js";
+import { techJobsRouter } from "./modules/technician/jobs/jobs.routes.js";
+import { techEarningsRouter } from "./modules/technician/earnings/earnings.routes.js";
+import { techMessagesRouter } from "./modules/technician/messages/messages.routes.js";
+import { techLocationRouter } from "./modules/technician/location/location.routes.js";
 
 // ─── Admin module routers ────────────────────────────────────
-import { adminAuthRouter } from "./modules/admin/auth/auth.routes";
-import { adminDashboardRouter } from "./modules/admin/dashboard/dashboard.routes";
-import { adminUsersRouter } from "./modules/admin/users/users.routes";
-import { adminTechniciansRouter } from "./modules/admin/technicians/technicians.routes";
-import { adminVendorsRouter } from "./modules/admin/vendors/vendors.routes";
-import { adminWarehousesRouter } from "./modules/admin/warehouses/warehouses.routes";
-import { adminRequestsRouter } from "./modules/admin/requests/requests.routes";
-import { adminJobsRouter } from "./modules/admin/jobs/jobs.routes";
-import { adminOrdersRouter } from "./modules/admin/orders/orders.routes";
-import { adminInvoicesRouter } from "./modules/admin/invoices/invoices.routes";
-import { adminAnalyticsRouter } from "./modules/admin/analytics/analytics.routes";
-import { adminAuditLogsRouter } from "./modules/admin/auditLogs/auditLogs.routes";
+import { adminAuthRouter } from "./modules/admin/auth/auth.routes.js";
+import { adminDashboardRouter } from "./modules/admin/dashboard/dashboard.routes.js";
+import { adminUsersRouter } from "./modules/admin/users/users.routes.js";
+import { adminTechniciansRouter } from "./modules/admin/technicians/technicians.routes.js";
+import { adminVendorsRouter } from "./modules/admin/vendors/vendors.routes.js";
+import { adminWarehousesRouter } from "./modules/admin/warehouses/warehouses.routes.js";
+import { adminRequestsRouter } from "./modules/admin/requests/requests.routes.js";
+import { adminJobsRouter } from "./modules/admin/jobs/jobs.routes.js";
+import { adminOrdersRouter } from "./modules/admin/orders/orders.routes.js";
+import { adminInvoicesRouter } from "./modules/admin/invoices/invoices.routes.js";
+import { adminAnalyticsRouter } from "./modules/admin/analytics/analytics.routes.js";
+import { adminAuditLogsRouter } from "./modules/admin/auditLogs/auditLogs.routes.js";
 
 // ─── Vendor module routers ───────────────────────────────────
-import { vendorAuthRouter } from "./modules/vendor/auth/auth.routes";
-import { vendorWarehousesRouter } from "./modules/vendor/warehouses/warehouses.routes";
-import { vendorInventoryRouter } from "./modules/vendor/inventory/inventory.routes";
-import { vendorReservationsRouter } from "./modules/vendor/reservations/reservations.routes";
-import { vendorOrdersRouter } from "./modules/vendor/orders/orders.routes";
-import { vendorFulfillmentRouter } from "./modules/vendor/fulfillment/fulfillment.routes";
-import { vendorAnalyticsRouter } from "./modules/vendor/analytics/analytics.routes";
+import { vendorAuthRouter } from "./modules/vendor/auth/auth.routes.js";
+import { vendorWarehousesRouter } from "./modules/vendor/warehouses/warehouses.routes.js";
+import { vendorInventoryRouter } from "./modules/vendor/inventory/inventory.routes.js";
+import { vendorReservationsRouter } from "./modules/vendor/reservations/reservations.routes.js";
+import { vendorOrdersRouter } from "./modules/vendor/orders/orders.routes.js";
+import { vendorFulfillmentRouter } from "./modules/vendor/fulfillment/fulfillment.routes.js";
+import { vendorAnalyticsRouter } from "./modules/vendor/analytics/analytics.routes.js";
 
-import { errorHandler } from "./middleware/errorHandler";
-import { authLimiter } from "./middleware/rateLimiter";
-import { validateUUIDParams } from "./middleware/validateParams";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { authLimiter } from "./middleware/rateLimiter.js";
+import { validateUUIDParams } from "./middleware/validateParams.js";
 
 const app = express();
 
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173,http://localhost:5174")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );

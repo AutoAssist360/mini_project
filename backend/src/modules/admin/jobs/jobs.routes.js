@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { listJobsQuery } from "../admin.schemas";
-import { dateFilter, paginate } from "../admin.helpers";
+import { prisma } from "../../../lib/prisma.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { listJobsQuery } from "../admin.schemas.js";
+import { dateFilter, paginate } from "../admin.helpers.js";
 
 export const adminJobsRouter = Router();
 

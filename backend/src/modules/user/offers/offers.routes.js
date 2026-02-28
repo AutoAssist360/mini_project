@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { prisma } from "../../../lib/prisma";
-import { userAuth } from "../../../middleware/auth";
-import { roleGuard } from "../../../middleware/roleGuard";
-import { paginate, paginationQuery } from "../../../utils/paginate";
-import { asyncWrapper } from "../../../utils/asyncWrapper";
-import { AppError } from "../../../utils/AppError";
+import { prisma } from "../../../lib/prisma.js";
+import { userAuth } from "../../../middleware/auth.js";
+import { roleGuard } from "../../../middleware/roleGuard.js";
+import { paginate, paginationQuery } from "../../../utils/paginate.js";
+import { asyncWrapper } from "../../../utils/asyncWrapper.js";
+import { AppError } from "../../../utils/AppError.js";
 
 export const offerRouter = Router();
 

@@ -1,5 +1,5 @@
 
-import { AppError } from "../utils/AppError";
+import { AppError } from "../utils/AppError.js";
 import { z } from "zod";
 
 /**

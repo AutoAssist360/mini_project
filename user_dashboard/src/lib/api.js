@@ -1,4 +1,23 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+const RAW_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+
+function normalizeBaseUrl(url) {
+  return (url || 'http://localhost:3000').replace(/\/+$/, '')
+}
+
+function getBaseCandidates() {
+  const normalized = normalizeBaseUrl(RAW_API_BASE_URL)
+  const candidates = [normalized]
+
+  if (normalized.endsWith('/api')) {
+    candidates.push(normalized.slice(0, -4))
+  } else {
+    candidates.push(`${normalized}/api`)
+  }
+
+  return [...new Set(candidates)]
+}
+
+const API_BASE_CANDIDATES = getBaseCandidates()
 
 export class ApiError extends Error {
   constructor(message, status, data) {
@@ -10,23 +29,40 @@ export class ApiError extends Error {
 }
 
 export async function apiRequest(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
-    ...options,
-  })
+  let lastError
 
-  const isJson = (response.headers.get('content-type') || '').includes('application/json')
-  const data = isJson ? await response.json() : null
+  for (const baseUrl of API_BASE_CANDIDATES) {
+    const response = await fetch(`${baseUrl}${path}`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      },
+      ...options,
+    })
 
-  if (!response.ok) {
-    throw new ApiError(data?.message || 'Request failed', response.status, data)
+    const isJson = (response.headers.get('content-type') || '').includes('application/json')
+    const data = isJson ? await response.json() : null
+
+    if (response.ok) {
+      return data
+    }
+
+    const message = data?.message || 'Request failed'
+    const isLikelyWrongBase =
+      response.status === 404 && /route not found/i.test(message)
+
+    if (!isLikelyWrongBase) {
+      throw new ApiError(message, response.status, data)
+    }
+
+    lastError = new ApiError(message, response.status, {
+      ...(data || {}),
+      requestUrl: `${baseUrl}${path}`,
+    })
   }
 
-  return data
+  throw lastError || new ApiError('Request failed', 500, null)
 }
 
 export async function userSignIn(payload) {
@@ -44,7 +80,7 @@ export async function userSignUp(payload) {
 }
 
 export async function getMyProfile() {
-  return apiRequest('/profile/me', {
+  return apiRequest('/profile', {
     method: 'GET',
   })
 }
