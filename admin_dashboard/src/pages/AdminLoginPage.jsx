@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { adminSignIn, ApiError, getAdminDashboard } from '../lib/api'
+import { adminSignIn, ApiError, getDashboard } from '../lib/api'
 import { setAuthTokens, setAuthUser, setDashboardSnapshot } from '../store/authSlice'
 
 function AdminLoginPage({ theme, onToggleTheme }) {
@@ -64,7 +64,7 @@ function AdminLoginPage({ theme, onToggleTheme }) {
         }),
       )
 
-      const dashboardResponse = await getAdminDashboard(signInResponse?.accessToken)
+      const dashboardResponse = await getDashboard()
       dispatch(setDashboardSnapshot(dashboardResponse || null))
       dispatch(setAuthUser({ email: form.email, role: 'admin' }))
 
