@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { adminSignIn, ApiError, getDashboard } from '../lib/api'
-import { setAuthTokens, setAuthUser, setDashboardSnapshot } from '../store/authSlice'
+import { setAuthUser, setDashboardSnapshot } from '../store/authSlice'
 
 function AdminLoginPage({ theme, onToggleTheme }) {
   const navigate = useNavigate()
@@ -52,18 +52,12 @@ function AdminLoginPage({ theme, onToggleTheme }) {
     setErrors({ email: '', password: '', form: '' })
 
     try {
-      const signInResponse = await adminSignIn({
+      await adminSignIn({
         email: form.email,
         password: form.password,
       })
 
-      dispatch(
-        setAuthTokens({
-          accessToken: signInResponse?.accessToken || null,
-          refreshToken: signInResponse?.refreshToken || null,
-        }),
-      )
-
+      // Cookies are set by the backend — no need to store tokens in JS.
       const dashboardResponse = await getDashboard()
       dispatch(setDashboardSnapshot(dashboardResponse || null))
       dispatch(setAuthUser({ email: form.email, role: 'admin' }))

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { ApiError, getTechnicianProfile, technicianSignIn } from '../lib/api'
-import { setAuthTokens, setAuthUser } from '../store/authSlice'
+import { setAuthUser } from '../store/authSlice'
 
 function TechnicianSignInPage({ theme, onToggleTheme }) {
   const navigate = useNavigate()
@@ -60,14 +60,9 @@ function TechnicianSignInPage({ theme, onToggleTheme }) {
         password: form.password,
       })
 
-      dispatch(
-        setAuthTokens({
-          accessToken: signInResponse?.accessToken || null,
-          refreshToken: signInResponse?.refreshToken || null,
-        }),
-      )
-
-      const profileResponse = await getTechnicianProfile(signInResponse?.accessToken)
+      // Cookies are set by the backend — no need to store tokens in JS.
+      // Now fetch the profile using the session cookie.
+      const profileResponse = await getTechnicianProfile()
       const role = profileResponse?.profile?.user?.role || ''
 
       if (role !== 'technician') {

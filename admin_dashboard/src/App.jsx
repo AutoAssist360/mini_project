@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { setAuthUser, setDashboardSnapshot, clearAuth } from './store/authSlice'
+import { refreshSession, getDashboard } from './lib/api'
 
 import AdminLoginPage           from './pages/AdminLoginPage'
 import AdminDashboardPage       from './pages/AdminDashboardPage'
@@ -24,7 +26,8 @@ import AdminAnalyticsPage       from './pages/AdminAnalyticsPage'
 import AdminAuditLogsPage       from './pages/AdminAuditLogsPage'
 
 function RequireAuth({ children }) {
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
+  const { isAuthenticated, isInitializing } = useSelector((state) => state.auth)
+  if (isInitializing) return null
   if (!isAuthenticated) return <Navigate to="/admin/login" replace />
   return children
 }
@@ -34,6 +37,9 @@ function Auth({ children }) {
 }
 
 function App() {
+  const dispatch = useDispatch()
+  const isInitializing = useSelector((state) => state.auth.isInitializing)
+
   const [theme, setTheme] = useState(() => {
     const stored = localStorage.getItem('qa-admin-theme')
     if (stored) return stored
@@ -45,7 +51,39 @@ function App() {
     localStorage.setItem('qa-admin-theme', theme)
   }, [theme])
 
+  // ── Session check on mount ───────────────────────────────
+  // The httpOnly cookies are sent automatically. If the refresh cookie
+  // is still valid we restore the session; otherwise admin must log in.
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        await refreshSession()
+        // Session valid — pre-fetch dashboard snapshot
+        try {
+          const dashData = await getDashboard()
+          dispatch(setDashboardSnapshot(dashData || null))
+        } catch {
+          // dashboard fetch optional — session is still valid
+        }
+        dispatch(setAuthUser({ role: 'admin' }))
+      } catch {
+        dispatch(clearAuth())
+      }
+    }
+    checkSession()
+  }, [dispatch])
+
   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark')
+
+  // Show a minimal loading screen while verifying the session cookie
+  if (isInitializing) {
+    return (
+      <div className={`flex min-h-screen items-center justify-center ${theme === 'dark' ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
+        <p className="text-sm text-slate-500">Checking session...</p>
+      </div>
+    )
+  }
+
   const tp = { theme, onToggleTheme: toggleTheme }
 
   return (

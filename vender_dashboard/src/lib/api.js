@@ -1,5 +1,3 @@
-import { setAuthTokens } from '../store/authSlice'
-
 const RAW_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 
 function normalizeBaseUrl(url) {
@@ -31,30 +29,20 @@ export class ApiError extends Error {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Shared refresh-lock                                                */
+/*  Core request — cookie-only auth (no Bearer headers)                */
 /* ------------------------------------------------------------------ */
-let refreshPromise = null
-
-async function doRefresh(accessToken) {
-  return apiRequestRaw('/vendor/auth/refresh', {
-    method: 'POST',
-    accessToken,
-  })
-}
-
-async function apiRequestRaw(path, options = {}) {
+export async function apiRequest(path, options = {}) {
   let lastError
-  const { accessToken, ...fetchOptions } = options
+  const _retried = options._retried || false
+  const { _retried: _, ...fetchOptions } = options
 
   for (let index = 0; index < API_BASE_CANDIDATES.length; index += 1) {
     const baseUrl = API_BASE_CANDIDATES[index]
-    const hasMoreCandidates = index < API_BASE_CANDIDATES.length - 1
 
     const response = await fetch(`${baseUrl}${path}`, {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         ...(fetchOptions.headers || {}),
       },
       ...fetchOptions,
@@ -64,69 +52,62 @@ async function apiRequestRaw(path, options = {}) {
     const data = isJson ? await response.json() : null
 
     if (response.ok) {
-      return { data, status: response.status }
+      return data
     }
 
     const message = data?.message || 'Request failed'
     const isLikelyWrongBase =
       response.status === 404 && /route not found/i.test(message)
-    const isLikelyWrongBaseAuth =
-      hasMoreCandidates &&
-      response.status === 401 &&
-      /authentication token missing/i.test(message)
 
-    if (!isLikelyWrongBase && !isLikelyWrongBaseAuth) {
-      throw new ApiError(message, response.status, data)
+    if (isLikelyWrongBase) {
+      lastError = new ApiError(message, response.status, {
+        ...(data || {}),
+        requestUrl: `${baseUrl}${path}`,
+      })
+      continue
     }
 
-    lastError = new ApiError(message, response.status, {
-      ...(data || {}),
-      requestUrl: `${baseUrl}${path}`,
-    })
+    // Auto-refresh on expired access token (retry once)
+    if (response.status === 401 && !_retried) {
+      try {
+        await refreshSession()
+        return apiRequest(path, { ...fetchOptions, _retried: true })
+      } catch {
+        // refresh failed — fall through to throw original error
+      }
+    }
+
+    throw new ApiError(message, response.status, data)
   }
 
   throw lastError || new ApiError('Request failed', 500, null)
 }
 
 /* ------------------------------------------------------------------ */
-/*  Main request helper — auto token refresh on 401                    */
+/*  Token refresh (shared promise prevents concurrent refresh calls)   */
 /* ------------------------------------------------------------------ */
-let _getStore = null
-export function wireStore(fn) { _getStore = fn }
+let refreshPromise = null
 
-export async function apiRequest(path, options = {}) {
-  const store = _getStore?.()
-  const token = options.accessToken || store?.getState()?.auth?.accessToken
-  try {
-    const { data } = await apiRequestRaw(path, { ...options, accessToken: token })
-    return data
-  } catch (err) {
-    if (
-      err instanceof ApiError &&
-      err.status === 401 &&
-      /expired/i.test(err.message) &&
-      store
-    ) {
+export async function refreshSession() {
+  if (refreshPromise) return refreshPromise
+
+  refreshPromise = (async () => {
+    for (const baseUrl of API_BASE_CANDIDATES) {
       try {
-        if (!refreshPromise) refreshPromise = doRefresh(token)
-        const { data: refreshData } = await refreshPromise
-        refreshPromise = null
-
-        store.dispatch(setAuthTokens({
-          accessToken: refreshData?.accessToken || null,
-          refreshToken: refreshData?.refreshToken || null,
-        }))
-
-        const newToken = refreshData?.accessToken || token
-        const { data: retryData } = await apiRequestRaw(path, { ...options, accessToken: newToken })
-        return retryData
+        const res = await fetch(`${baseUrl}/vendor/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        })
+        if (res.ok) return true
       } catch {
-        refreshPromise = null
-        throw err
+        // try next base URL candidate
       }
     }
-    throw err
-  }
+    throw new Error('Session expired')
+  })().finally(() => { refreshPromise = null })
+
+  return refreshPromise
 }
 
 /* ------------------------------------------------------------------ */

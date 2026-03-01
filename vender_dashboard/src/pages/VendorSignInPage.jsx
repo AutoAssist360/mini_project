@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { ApiError, getWarehouses, vendorSignIn } from '../lib/api'
-import { setAuthTokens, setAuthUser } from '../store/authSlice'
+import { setAuthUser } from '../store/authSlice'
 
 function VendorSignInPage({ theme, onToggleTheme }) {
   const navigate = useNavigate()
@@ -54,18 +54,12 @@ function VendorSignInPage({ theme, onToggleTheme }) {
     setErrors({ email: '', password: '', form: '' })
 
     try {
-      const signInResponse = await vendorSignIn({
+      await vendorSignIn({
         email: form.email,
         password: form.password,
       })
 
-      dispatch(
-        setAuthTokens({
-          accessToken: signInResponse?.accessToken || null,
-          refreshToken: signInResponse?.refreshToken || null,
-        }),
-      )
-
+      // Cookies are set by the backend — no need to store tokens in JS.
       await getWarehouses(1, 5)
       dispatch(setAuthUser({ email: form.email, role: 'vendor' }))
       navigate('/dashboard')

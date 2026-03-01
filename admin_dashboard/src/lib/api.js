@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------ */
-/*  Admin Dashboard — API layer                                       */
+/*  Admin Dashboard — API layer (cookie-only auth)                    */
 /* ------------------------------------------------------------------ */
 
 const RAW_API_BASE_URL =
@@ -17,10 +17,6 @@ function getBaseCandidates() {
 }
 const API_BASE_CANDIDATES = getBaseCandidates()
 
-/* ---------- store wiring (avoids circular imports) ---------- */
-let _getStore = () => null
-export function wireStore(fn) { _getStore = fn }
-
 /* ---------- error class ---------- */
 export class ApiError extends Error {
   constructor(message, status, data) {
@@ -31,25 +27,22 @@ export class ApiError extends Error {
   }
 }
 
-/* ---------- low-level request (base-url fallback) ---------- */
-async function apiRequestRaw(path, options = {}) {
+/* ---------- core request — cookie-only (no Bearer headers) ---------- */
+async function apiRequest(path, options = {}) {
   let lastError
-  const { headers: extra, ...rest } = options
-  const store  = _getStore()
-  const token  = store?.getState()?.auth?.accessToken
+  const _retried = options._retried || false
+  const { _retried: _, ...fetchOptions } = options
 
   for (let i = 0; i < API_BASE_CANDIDATES.length; i++) {
     const base = API_BASE_CANDIDATES[i]
-    const more = i < API_BASE_CANDIDATES.length - 1
 
     const res = await fetch(`${base}${path}`, {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...extra,
+        ...(fetchOptions.headers || {}),
       },
-      ...rest,
+      ...fetchOptions,
     })
 
     const json = (res.headers.get('content-type') || '').includes('application/json')
@@ -59,43 +52,51 @@ async function apiRequestRaw(path, options = {}) {
 
     const msg = data?.message || 'Request failed'
     const wrongBase =
-      (res.status === 404 && /route not found/i.test(msg)) ||
-      (more && res.status === 401 && /authentication token missing/i.test(msg))
+      res.status === 404 && /route not found/i.test(msg)
 
-    if (!wrongBase) throw new ApiError(msg, res.status, data)
-    lastError = new ApiError(msg, res.status, data)
+    if (wrongBase) {
+      lastError = new ApiError(msg, res.status, data)
+      continue
+    }
+
+    // Auto-refresh on expired access token (retry once)
+    if (res.status === 401 && !_retried) {
+      try {
+        await refreshSession()
+        return apiRequest(path, { ...fetchOptions, _retried: true })
+      } catch {
+        // refresh failed — fall through to throw original error
+      }
+    }
+
+    throw new ApiError(msg, res.status, data)
   }
   throw lastError || new ApiError('Request failed', 500, null)
 }
 
-/* ---------- auto-refresh wrapper ---------- */
+/* ---------- Token refresh (shared promise) ---------- */
 let refreshPromise = null
 
-async function apiRequest(path, options = {}) {
-  try {
-    return await apiRequestRaw(path, options)
-  } catch (err) {
-    if (err.status !== 401) throw err
+export async function refreshSession() {
+  if (refreshPromise) return refreshPromise
 
-    const store = _getStore()
-    if (!store) throw err
-
-    if (!refreshPromise) {
-      refreshPromise = apiRequestRaw('/admin/auth/refresh', { method: 'POST' })
-        .then((r) => {
-          store.dispatch({ type: 'auth/setAuthTokens', payload: { accessToken: r.accessToken } })
-          return r
+  refreshPromise = (async () => {
+    for (const base of API_BASE_CANDIDATES) {
+      try {
+        const res = await fetch(`${base}/admin/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
         })
-        .catch((e) => {
-          store.dispatch({ type: 'auth/clearAuth' })
-          throw e
-        })
-        .finally(() => { refreshPromise = null })
+        if (res.ok) return true
+      } catch {
+        // try next base URL candidate
+      }
     }
+    throw new Error('Session expired')
+  })().finally(() => { refreshPromise = null })
 
-    await refreshPromise
-    return apiRequestRaw(path, options)
-  }
+  return refreshPromise
 }
 
 /* ================================================================== */
@@ -114,16 +115,13 @@ function qs(params = {}) {
 /*  1. AUTH                                                           */
 /* ================================================================== */
 export function adminSignIn(payload) {
-  return apiRequestRaw('/admin/auth/signin', {
+  return apiRequest('/admin/auth/signin', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
 }
 export function adminLogout() {
   return apiRequest('/admin/auth/logout', { method: 'POST' })
-}
-export function adminRefresh() {
-  return apiRequestRaw('/admin/auth/refresh', { method: 'POST' })
 }
 
 /* ================================================================== */
@@ -284,9 +282,6 @@ export function getAuditLogs(params) {
   return apiRequest(`/admin/audit-logs${qs(params)}`)
 }
 
-export async function getAdminDashboard(accessToken) {
-  return apiRequest('/admin/dashboard', {
-    method: 'GET',
-    accessToken,
-  })
+export function getAdminDashboard() {
+  return apiRequest('/admin/dashboard')
 }
