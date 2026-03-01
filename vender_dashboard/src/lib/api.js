@@ -1,3 +1,5 @@
+import { setAuthTokens } from '../store/authSlice'
+
 const RAW_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 
 function normalizeBaseUrl(url) {
@@ -28,7 +30,19 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiRequest(path, options = {}) {
+/* ------------------------------------------------------------------ */
+/*  Shared refresh-lock                                                */
+/* ------------------------------------------------------------------ */
+let refreshPromise = null
+
+async function doRefresh(accessToken) {
+  return apiRequestRaw('/vendor/auth/refresh', {
+    method: 'POST',
+    accessToken,
+  })
+}
+
+async function apiRequestRaw(path, options = {}) {
   let lastError
   const { accessToken, ...fetchOptions } = options
 
@@ -50,7 +64,7 @@ export async function apiRequest(path, options = {}) {
     const data = isJson ? await response.json() : null
 
     if (response.ok) {
-      return data
+      return { data, status: response.status }
     }
 
     const message = data?.message || 'Request failed'
@@ -74,29 +88,195 @@ export async function apiRequest(path, options = {}) {
   throw lastError || new ApiError('Request failed', 500, null)
 }
 
+/* ------------------------------------------------------------------ */
+/*  Main request helper — auto token refresh on 401                    */
+/* ------------------------------------------------------------------ */
+let _getStore = null
+export function wireStore(fn) { _getStore = fn }
+
+export async function apiRequest(path, options = {}) {
+  const store = _getStore?.()
+  const token = options.accessToken || store?.getState()?.auth?.accessToken
+  try {
+    const { data } = await apiRequestRaw(path, { ...options, accessToken: token })
+    return data
+  } catch (err) {
+    if (
+      err instanceof ApiError &&
+      err.status === 401 &&
+      /expired/i.test(err.message) &&
+      store
+    ) {
+      try {
+        if (!refreshPromise) refreshPromise = doRefresh(token)
+        const { data: refreshData } = await refreshPromise
+        refreshPromise = null
+
+        store.dispatch(setAuthTokens({
+          accessToken: refreshData?.accessToken || null,
+          refreshToken: refreshData?.refreshToken || null,
+        }))
+
+        const newToken = refreshData?.accessToken || token
+        const { data: retryData } = await apiRequestRaw(path, { ...options, accessToken: newToken })
+        return retryData
+      } catch {
+        refreshPromise = null
+        throw err
+      }
+    }
+    throw err
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Auth                                                               */
+/* ------------------------------------------------------------------ */
 export async function vendorSignIn(payload) {
-  return apiRequest('/vendor/auth/signin', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  })
+  return apiRequest('/vendor/auth/signin', { method: 'POST', body: JSON.stringify(payload) })
 }
 
 export async function vendorSignUp(payload) {
-  return apiRequest('/vendor/auth/signup', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  })
+  return apiRequest('/vendor/auth/signup', { method: 'POST', body: JSON.stringify(payload) })
 }
 
 export async function vendorLogout() {
-  return apiRequest('/vendor/auth/logout', {
-    method: 'POST',
-  })
+  return apiRequest('/vendor/auth/logout', { method: 'POST' })
 }
 
-export async function getVendorWarehouses(accessToken) {
-  return apiRequest('/vendor/warehouses?page=1&limit=5', {
-    method: 'GET',
-    accessToken,
-  })
+/* ------------------------------------------------------------------ */
+/*  Warehouses                                                         */
+/* ------------------------------------------------------------------ */
+export async function getWarehouses(page = 1, limit = 20, isActive) {
+  let qs = `?page=${page}&limit=${limit}`
+  if (isActive !== undefined) qs += `&is_active=${isActive}`
+  return apiRequest(`/vendor/warehouses${qs}`)
+}
+
+export async function getWarehouseById(warehouseId) {
+  return apiRequest(`/vendor/warehouses/${warehouseId}`)
+}
+
+export async function createWarehouse(payload) {
+  return apiRequest('/vendor/warehouses', { method: 'POST', body: JSON.stringify(payload) })
+}
+
+export async function updateWarehouse(warehouseId, payload) {
+  return apiRequest(`/vendor/warehouses/${warehouseId}`, { method: 'PUT', body: JSON.stringify(payload) })
+}
+
+export async function deleteWarehouse(warehouseId) {
+  return apiRequest(`/vendor/warehouses/${warehouseId}`, { method: 'DELETE' })
+}
+
+/* ------------------------------------------------------------------ */
+/*  Inventory                                                          */
+/* ------------------------------------------------------------------ */
+export async function getInventory(warehouseId, page = 1, limit = 20, lowStock) {
+  let qs = `?page=${page}&limit=${limit}`
+  if (lowStock) qs += '&low_stock=true'
+  return apiRequest(`/vendor/warehouses/${warehouseId}/inventory${qs}`)
+}
+
+export async function addInventory(warehouseId, payload) {
+  return apiRequest(`/vendor/warehouses/${warehouseId}/inventory`, { method: 'POST', body: JSON.stringify(payload) })
+}
+
+export async function updateInventory(inventoryId, payload) {
+  return apiRequest(`/vendor/inventory/${inventoryId}`, { method: 'PUT', body: JSON.stringify(payload) })
+}
+
+export async function deleteInventory(inventoryId) {
+  return apiRequest(`/vendor/inventory/${inventoryId}`, { method: 'DELETE' })
+}
+
+export async function bulkUpsertInventory(warehouseId, items) {
+  return apiRequest(`/vendor/warehouses/${warehouseId}/inventory/bulk`, { method: 'POST', body: JSON.stringify({ items }) })
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reservations                                                       */
+/* ------------------------------------------------------------------ */
+export async function getReservations(warehouseId, page = 1, limit = 20, status) {
+  let qs = `?page=${page}&limit=${limit}`
+  if (status) qs += `&status=${status}`
+  return apiRequest(`/vendor/warehouses/${warehouseId}/reservations${qs}`)
+}
+
+export async function getReservationById(reservationId) {
+  return apiRequest(`/vendor/reservations/${reservationId}`)
+}
+
+/* ------------------------------------------------------------------ */
+/*  Orders                                                             */
+/* ------------------------------------------------------------------ */
+export async function getOrders(page = 1, limit = 20, filters = {}) {
+  let qs = `?page=${page}&limit=${limit}`
+  if (filters.order_status) qs += `&order_status=${filters.order_status}`
+  if (filters.payment_status) qs += `&payment_status=${filters.payment_status}`
+  if (filters.from) qs += `&from=${filters.from}`
+  if (filters.to) qs += `&to=${filters.to}`
+  return apiRequest(`/vendor/orders${qs}`)
+}
+
+export async function getOrderById(orderId) {
+  return apiRequest(`/vendor/orders/${orderId}`)
+}
+
+export async function confirmOrder(orderId) {
+  return apiRequest(`/vendor/orders/${orderId}/confirm`, { method: 'PATCH' })
+}
+
+export async function cancelOrder(orderId) {
+  return apiRequest(`/vendor/orders/${orderId}/cancel`, { method: 'PATCH' })
+}
+
+export async function returnOrder(orderId, reason) {
+  return apiRequest(`/vendor/orders/${orderId}/return`, { method: 'POST', body: JSON.stringify({ reason }) })
+}
+
+/* ------------------------------------------------------------------ */
+/*  Fulfillment                                                        */
+/* ------------------------------------------------------------------ */
+export async function getOrderFulfillments(orderId) {
+  return apiRequest(`/vendor/orders/${orderId}/fulfillment`)
+}
+
+export async function updateFulfillmentStatus(fulfillmentId, payload) {
+  return apiRequest(`/vendor/fulfillment/${fulfillmentId}/status`, { method: 'PATCH', body: JSON.stringify(payload) })
+}
+
+/* ------------------------------------------------------------------ */
+/*  Analytics                                                          */
+/* ------------------------------------------------------------------ */
+export async function getRevenueAnalytics(from, to) {
+  let qs = ''
+  if (from || to) {
+    const parts = []
+    if (from) parts.push(`from=${from}`)
+    if (to) parts.push(`to=${to}`)
+    qs = `?${parts.join('&')}`
+  }
+  return apiRequest(`/vendor/analytics/revenue${qs}`)
+}
+
+export async function getOrderAnalytics(from, to) {
+  let qs = ''
+  if (from || to) {
+    const parts = []
+    if (from) parts.push(`from=${from}`)
+    if (to) parts.push(`to=${to}`)
+    qs = `?${parts.join('&')}`
+  }
+  return apiRequest(`/vendor/analytics/orders${qs}`)
+}
+
+export async function getInventoryAnalytics() {
+  return apiRequest('/vendor/analytics/inventory')
+}
+
+export async function getLowStockItems(warehouseId, page = 1, limit = 20, threshold) {
+  let qs = `?page=${page}&limit=${limit}`
+  if (threshold) qs += `&threshold=${threshold}`
+  return apiRequest(`/vendor/analytics/warehouses/${warehouseId}/low-stock${qs}`)
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { ApiError, getVendorWarehouses, vendorSignIn } from '../lib/api'
+import { ApiError, getWarehouses, vendorSignIn } from '../lib/api'
 import { setAuthTokens, setAuthUser } from '../store/authSlice'
 
 function VendorSignInPage({ theme, onToggleTheme }) {
@@ -66,7 +66,7 @@ function VendorSignInPage({ theme, onToggleTheme }) {
         }),
       )
 
-      await getVendorWarehouses(signInResponse?.accessToken)
+      await getWarehouses(1, 5)
       dispatch(setAuthUser({ email: form.email, role: 'vendor' }))
       navigate('/dashboard')
     } catch (error) {
